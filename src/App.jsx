@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { BandsContext } from "./Contexts/BandsContext.js";
 import { LoginContext } from "./Contexts/LoginContext.js";
 import { TicketsContext } from "./Contexts/TicketsContext.js";
+import { ScheduleContext } from "./Contexts/ScheduleContext.js";
+import FestApp from "./FestApp";
+import RegApp from "./RegApp";
 
 // export const envData = {
 //   availableSpots: process.env.FAELLESTIVAL_AVAILABLE_SPOTS,
@@ -17,6 +20,7 @@ function App() {
   const [bandsData, setBandsData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
   const [scheduleData, setScheduleData] = useState([]);
+  const [ticketsData, setTicketsData] = useState([]);
 
   useEffect(() => {
     fetch("https://a3m-festival.herokuapp.com/bands")
@@ -35,21 +39,29 @@ function App() {
         console.log(sdata);
       });
   }, []);
+
+  useEffect(() => {
+    fetch("https://a3m-festival.herokuapp.com/available-spots")
+      .then((res) => res.json())
+      .then((tdata) => {
+        setTicketsData(tdata);
+        console.log(tdata);
+      });
+  }, []);
+
   return (
     <>
       <BandsContext.Provider value={bandsData}>
-        <TicketsContext.Provider value={scheduleData}>
-          <LoginContext.Provider value={isLogin}>
-            {isLogin ? <FestApp /> : <RegApp />}
-          </LoginContext.Provider>
-        </TicketsContext.Provider>
+        <ScheduleContext.Provider value={scheduleData}>
+          <TicketsContext.Provider value={ticketsData}>
+            <LoginContext.Provider value={{ isLogin, setIsLogin }}>
+              {isLogin ? <FestApp /> : <RegApp />}
+            </LoginContext.Provider>
+          </TicketsContext.Provider>
+        </ScheduleContext.Provider>
       </BandsContext.Provider>
     </>
   );
-}
-
-function RegApp() {
-  return <h1>Faellestival</h1>;
 }
 
 export default App;
